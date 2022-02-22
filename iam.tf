@@ -1,3 +1,4 @@
+## Create IAM Policy and Role for Lambda
 data "aws_iam_policy_document" "lambda_iam_policy" {
   version = "2012-10-17"
 

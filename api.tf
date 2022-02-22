@@ -1,12 +1,20 @@
+# Create REST API
 resource "aws_api_gateway_rest_api" "example" {
   name = var.api_name
 }
-
+# Create Resource in this REST API
 resource "aws_api_gateway_resource" "example" {
   parent_id   = aws_api_gateway_rest_api.example.root_resource_id
   path_part   = var.api_resource_path
   rest_api_id = aws_api_gateway_rest_api.example.id
 }
+
+###########################################################
+# OPTIONS METHOD BLOCK
+# This is typically generated for you in AWS Console
+# The response models/parameters are typically injected for
+# you as part of CORS configuration in AWS Console
+###########################################################
 
 resource "aws_api_gateway_method" "options" {
   authorization = "NONE"
@@ -58,6 +66,10 @@ resource "aws_api_gateway_integration_response" "options" {
   depends_on = [aws_api_gateway_method_response.options_200]
 }
 
+###########################################################
+# POST METHOD BLOCK
+###########################################################
+
 resource "aws_api_gateway_method" "post" {
   authorization = "NONE"
   http_method   = "POST"
@@ -103,6 +115,7 @@ resource "aws_api_gateway_integration_response" "post" {
   depends_on = [aws_api_gateway_method_response.post_200]
 }
 
+# DEPLOYMENT
 resource "aws_api_gateway_deployment" "post" {
   rest_api_id = aws_api_gateway_rest_api.example.id
 
@@ -126,12 +139,15 @@ resource "aws_api_gateway_deployment" "post" {
   }
 }
 
+# Create PROD Stage
 resource "aws_api_gateway_stage" "prod" {
   deployment_id = aws_api_gateway_deployment.post.id
   rest_api_id   = aws_api_gateway_rest_api.example.id
   stage_name    = "prod"
 }
 
+# Return Invoke URL
+# This needs to be written into JS file under S3/js
 locals {
   invoke_url = aws_api_gateway_stage.prod.invoke_url
 }
