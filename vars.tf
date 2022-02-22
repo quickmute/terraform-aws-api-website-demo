@@ -12,7 +12,7 @@ variable "api_name" {
 }
 
 variable "api_resource_path" {
-  default     = "mycalc"
+  default     = "myCalc"
   description = "Resource Path"
 }
 

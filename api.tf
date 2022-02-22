@@ -24,9 +24,9 @@ resource "aws_api_gateway_method_response" "options_200" {
     "application/json" = "Empty"
   }
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Headers" = true,
-    "method.response.header.Access-Control-Allow-Methods" = true,
-    "method.response.header.Access-Control-Allow-Origin"  = true
+    "method.response.header.Access-Control-Allow-Headers" = false,
+    "method.response.header.Access-Control-Allow-Methods" = false,
+    "method.response.header.Access-Control-Allow-Origin"  = false
   }
 }
 
@@ -35,6 +35,9 @@ resource "aws_api_gateway_integration" "options" {
   resource_id = aws_api_gateway_resource.example.id
   http_method = aws_api_gateway_method.options.http_method
   type        = "MOCK"
+  request_templates = {
+    "application/json" = jsonencode({statusCode = 200})
+  }
 }
 
 resource "aws_api_gateway_integration_response" "options" {
@@ -42,9 +45,14 @@ resource "aws_api_gateway_integration_response" "options" {
   resource_id = aws_api_gateway_resource.example.id
   http_method = aws_api_gateway_method.options.http_method
   status_code = aws_api_gateway_method_response.options_200.status_code
+  response_templates = {
+    "application/json" = ""
+  }
   response_parameters = {
     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-    "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST,PUT'",
+    "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'",
+    #we don't need all the methods, but here are the rest if you want
+    #"method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST,PUT'",
     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
   }
   depends_on = [aws_api_gateway_method_response.options_200]
@@ -62,8 +70,11 @@ resource "aws_api_gateway_method_response" "post_200" {
   resource_id = aws_api_gateway_resource.example.id
   http_method = aws_api_gateway_method.post.http_method
   status_code = "200"
+  response_models = {
+    "application/json" = "Empty"
+  }
   response_parameters = {
-    "method.response.header.Access-Control-Allow-Origin" = true
+    "method.response.header.Access-Control-Allow-Origin" = false
   }
   depends_on = [aws_api_gateway_method.post]
 }
@@ -72,9 +83,24 @@ resource "aws_api_gateway_integration" "post" {
   rest_api_id             = aws_api_gateway_rest_api.example.id
   resource_id             = aws_api_gateway_resource.example.id
   http_method             = aws_api_gateway_method.post.http_method
+  content_handling        = "CONVERT_TO_TEXT"
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.example.invoke_arn
+}
+
+resource "aws_api_gateway_integration_response" "post" {
+  rest_api_id = aws_api_gateway_rest_api.example.id
+  resource_id = aws_api_gateway_resource.example.id
+  http_method = aws_api_gateway_method.post.http_method
+  status_code = aws_api_gateway_method_response.post_200.status_code
+  response_templates = {
+    "application/json" = ""
+  }
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+  }
+  depends_on = [aws_api_gateway_method_response.post_200]
 }
 
 resource "aws_api_gateway_deployment" "post" {

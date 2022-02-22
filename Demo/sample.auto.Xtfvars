@@ -1,0 +1,4 @@
+myip       = "9.9.9.9/32"
+bucketname = "my-website-demo"
+access_key = "99999999999999"
+secret_key = "9999999999999999999999999999"

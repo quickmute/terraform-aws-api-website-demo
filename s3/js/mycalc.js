@@ -16,7 +16,7 @@
  function calc(argument_var){
    $.ajax({
             method: 'POST',
-            url: _config.api.invokeUrl + '/mycalc',
+            url: _config.api.invokeUrl + '/myCalc',
             headers: {
             
             },
