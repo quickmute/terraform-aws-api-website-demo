@@ -1,9 +1,11 @@
+# ZIP the lambda file
 data "archive_file" "example" {
   type        = "zip"
   output_path = "${path.module}/lambda/example.zip"
   source_dir  = "${path.module}/lambda/files"
 }
 
+# Create a Lambda function
 resource "aws_lambda_function" "example" {
   filename      = "${path.module}/lambda/example.zip"
   function_name = var.lambda_name
@@ -20,6 +22,8 @@ resource "aws_lambda_function" "example" {
     }
   }
 }
+
+# This is a resource permission that API GW will normally attach for you if you did this from AWS Console
 
 resource "aws_lambda_permission" "apigw_lambda" {
   statement_id  = "AllowExecutionFromAPIGateway"

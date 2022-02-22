@@ -1,3 +1,4 @@
+## Your S3 Bucket for this demo
 resource "aws_s3_bucket" "example" {
   bucket = var.bucketname
   tags = {
@@ -5,7 +6,8 @@ resource "aws_s3_bucket" "example" {
   }
 }
 
-## 4.0.0 code
+## Make this website enabled bucket
+## AWS Provider 4.0.0 code
 resource "aws_s3_bucket_website_configuration" "example" {
   bucket = aws_s3_bucket.example.bucket
 
@@ -18,6 +20,7 @@ resource "aws_s3_bucket_website_configuration" "example" {
   }
 }
 
+## Remove unneeded public access
 resource "aws_s3_bucket_public_access_block" "example" {
   bucket = aws_s3_bucket.example.id
 
@@ -27,6 +30,7 @@ resource "aws_s3_bucket_public_access_block" "example" {
   restrict_public_buckets = true
 }
 
+## Only allow from your testing machine
 data "aws_iam_policy_document" "allow_from_my_machine" {
   statement {
     principals {
@@ -54,6 +58,7 @@ data "aws_iam_policy_document" "allow_from_my_machine" {
   }
 }
 
+## Attach the bucket policy
 resource "aws_s3_bucket_policy" "example" {
   bucket = aws_s3_bucket.example.id
   policy = data.aws_iam_policy_document.allow_from_my_machine.json
@@ -75,7 +80,8 @@ locals {
   s3_path = "${path.module}/s3"
 }
 
-##4.0.0
+##Upload all files to S3
+##Another AWS Provider 4.0.0 resource
 resource "aws_s3_object" "object" {
   for_each = fileset(local.s3_path, "**")
   bucket   = aws_s3_bucket.example.id
